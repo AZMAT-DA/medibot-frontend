@@ -113,10 +113,10 @@ export default function Home() {
     if (!role) return;
 
     const greetings: Record<Role, string> = {
-      patient: "Welcome to MediBot! 👋 I can help you find available doctors, book appointments, or answer health queries.",
-      doctor:  "Hello Doctor! 👨‍⚕️ Your appointment queue and patient data are live. How can I assist?",
-      nurse:   "Hi Nurse! 💉 Your shift and ward assignments are loaded. What do you need help with?",
-      admin:   "Good day, Admin! 📊 Full hospital overview is live. What would you like to manage?",
+      patient: "Welcome to MediBot! 👋 I am powered by Claude AI. Ask me about finding doctors, booking appointments, or any health queries.",
+      doctor:  "Hello Doctor! 👨‍⚕️ Your interactive assistant is online. Ask me about schedules, patient lists, or assignments.",
+      nurse:   "Hi Nurse! 💉 Shift and ward logs are standing by. Let me know what information you need.",
+      admin:   "Good day, Admin! 📊 Admin assistance mode is ready. Ask me to quickly review metrics, staff presence, or reports.",
     };
     setMessages([{ text: greetings[role], sender: 'bot', time: nowTime() }]);
     loadData();
@@ -148,7 +148,7 @@ export default function Home() {
     }
   }
 
-  // ─── Send chat message ────────────────────────────────────────────────────
+  // ─── Send chat message (UPDATED TO CALL REAL CLAUDE AI ENDPOINT) ──────────
   async function sendMessage(textOverride?: string) {
     const text = (textOverride ?? input).trim();
     if (!text || chatLoading) return;
@@ -159,7 +159,7 @@ export default function Home() {
     setChatLoading(true);
 
     try {
-      const res = await fetch(`${API}/chat`, {
+      const res = await fetch(`${API}/chat/ai`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text, role }),
@@ -168,7 +168,7 @@ export default function Home() {
       setMessages(p => [...p, { text: data.reply, sender: 'bot', time: nowTime() }]);
     } catch {
       setMessages(p => [...p, {
-        text: '⚠️ Could not reach the server. Please check your connection and try again.',
+        text: "⚠️ I'm having trouble connecting to AI right now. Please verify your HF ANTHROPIC_API_KEY secret and try again shortly.",
         sender: 'bot', time: nowTime()
       }]);
     }
@@ -284,7 +284,7 @@ export default function Home() {
           <div className="max-w-3xl mx-auto mb-16">
             <div className="inline-flex items-center gap-2 text-xs text-teal-400 bg-teal-500/10 border border-teal-500/20 px-4 py-2 rounded-full mb-6 font-medium">
               <div className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse" />
-              Connected to live Python FastAPI backend on Hugging Face
+              Connected to live Claude AI Python Backend on Hugging Face
             </div>
             <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6 leading-tight text-white">
               The AI-Powered Hub For{' '}
@@ -293,7 +293,7 @@ export default function Home() {
               </span>
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
-              Real-time hospital assistant — connected to a live Python backend. Manage appointments, shifts, doctor availability and patient data all in one place.
+              Real-time hospital assistant — connected to a live Claude API backend. Manage appointments, shifts, doctor availability and patient data all in one place.
             </p>
           </div>
 
@@ -327,7 +327,7 @@ export default function Home() {
         </main>
 
         <footer className="relative z-10 border-t border-slate-800/60 py-5 text-center text-xs text-slate-600">
-          MediBot v2.0 — Frontend on Vercel · Backend on Hugging Face · Built with Next.js + FastAPI
+          MediBot v2.0 — Frontend on Vercel · Backend on Hugging Face · Powered by Anthropic Claude API
         </footer>
       </div>
     );
@@ -389,7 +389,7 @@ export default function Home() {
           {/* Chat header */}
           <div className="px-5 py-3 border-b border-slate-800 bg-slate-900/50 flex items-center gap-3 flex-shrink-0">
             <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs text-slate-400 font-medium uppercase tracking-widest">MediBot — Live Backend</span>
+            <span className="text-xs text-slate-400 font-medium uppercase tracking-widest">MediBot — Claude AI Assistant</span>
           </div>
 
           {/* Messages */}
@@ -431,8 +431,7 @@ export default function Home() {
             {quickReplies[role].map(q => (
               <button key={q} onClick={() => sendMessage(q)}
                 className="text-xs px-3 py-1.5 rounded-full border border-slate-700 bg-slate-900 text-slate-400
-                  hover:text-white transition-all"
-                style={{}}>
+                  hover:text-white transition-all">
                 {q}
               </button>
             ))}
@@ -444,7 +443,7 @@ export default function Home() {
               focus-within:border-teal-500/60 transition-colors">
               <textarea value={input} onChange={e => setInput(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-                placeholder={`Ask MediBot (${role} mode)…`} rows={1}
+                placeholder={`Ask Claude AI (${role} assistant)…`} rows={1}
                 className="flex-1 bg-transparent outline-none text-sm text-slate-200 placeholder-slate-600 resize-none leading-relaxed" />
               <button onClick={() => sendMessage()} disabled={!input.trim() || chatLoading}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-white flex-shrink-0 self-end
