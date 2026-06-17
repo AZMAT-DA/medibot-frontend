@@ -128,19 +128,29 @@ export default function Home() {
       // Ping backend first to make sure it's awake
       await fetch(`${API}/health`).catch(() => {});
 
-      const [d, n, a, o, s] = await Promise.all([
+      const [d, n, a, o] = await Promise.all([
         fetch(`${API}/doctors`).then(r => r.json()).catch(() => ({ doctors: [] })),
         fetch(`${API}/nurses`).then(r => r.json()).catch(() => ({ nurses: [] })),
         fetch(`${API}/appointments`).then(r => r.json()).catch(() => ({ appointments: [] })),
         fetch(`${API}/admin/overview`).then(r => r.json()).catch(() => null),
-        fetch(`${API}/appointments/stats`).then(r => r.json()).catch(() => null),
       ]);
+
+      const apptList: Appt[] = a.appointments ?? [];
 
       setDoctors(d.doctors   ?? []);
       setNurses(n.nurses     ?? []);
-      setAppts(a.appointments ?? []);
+      setAppts(apptList);
       setOverview(o);
-      setStats(s);
+
+      // Compute stats locally from the appointment list instead of a
+      // dedicated /appointments/stats endpoint (which the backend doesn't have).
+      setStats({
+        total:       apptList.length,
+        completed:   apptList.filter(x => x.status === 'completed').length,
+        waiting:     apptList.filter(x => x.status === 'waiting').length,
+        scheduled:   apptList.filter(x => x.status === 'scheduled').length,
+        in_progress: apptList.filter(x => x.status === 'in_progress').length,
+      });
     } catch {
       showToast('⚠️ Could not load data. Click 🔄 to retry.');
     } finally {
